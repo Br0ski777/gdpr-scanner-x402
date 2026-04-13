@@ -32,6 +32,50 @@ Do NOT use for PII in text -- use compliance_detect_pii instead. Do NOT use for 
         },
         required: ["url"],
       },
+      outputSchema: {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "URL scanned"
+            },
+            "score": {
+              "type": "number",
+              "description": "GDPR compliance score 0-100"
+            },
+            "issues": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              },
+              "description": "GDPR issues found"
+            },
+            "cookies": {
+              "type": "object",
+              "description": "Cookie analysis results"
+            },
+            "privacyPolicy": {
+              "type": "object",
+              "description": "Privacy policy analysis"
+            },
+            "consentBanner": {
+              "type": "object",
+              "description": "Consent banner analysis"
+            },
+            "trackers": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Third-party trackers found"
+            }
+          },
+          "required": [
+            "url",
+            "score",
+            "issues"
+          ]
+        },
     },
   ],
 };
