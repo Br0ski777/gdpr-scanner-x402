@@ -79,9 +79,9 @@ function extractHref(html: string, pattern: RegExp): string | undefined {
 }
 
 export function registerRoutes(app: Hono) {
-  app.get("/api/scan", async (c) => {
+  async function handleScan(c: any, params: { url?: string }) {
     await tryRequirePayment(0.02);
-    const url = c.req.query("url");
+    const url = params.url;
     if (!url) return c.json({ error: "Missing required parameter: url" }, 400);
 
     let baseUrl: string;
@@ -179,5 +179,18 @@ export function registerRoutes(app: Hono) {
     };
 
     return c.json(result);
+  }
+
+  app.get("/api/scan", async (c) => {
+    return handleScan(c, { url: c.req.query("url") });
+  });
+
+  // POST mirror of the GET route above -- Bazaar (CDP) only reliably indexes
+  // POST payments with valid payloads (~82% conversion vs ~14% for GET-only
+  // resources, confirmed empirically). Same params, same logic, just body
+  // instead of query string.
+  app.post("/api/scan", async (c) => {
+    const body = await c.req.json().catch(() => ({}) as any);
+    return handleScan(c, { url: body.url });
   });
 }
