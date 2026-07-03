@@ -1,5 +1,20 @@
 import type { Hono } from "hono";
 
+
+// ATXP: requirePayment only fires inside an ATXP context (set by atxpHono middleware).
+// For raw x402 requests, the existing @x402/hono middleware handles the gate.
+// If neither protocol is active (ATXP_CONNECTION unset), tryRequirePayment is a no-op.
+async function tryRequirePayment(price: number): Promise<void> {
+  if (!process.env.ATXP_CONNECTION) return;
+  try {
+    const { requirePayment } = await import("@atxp/server");
+    const BigNumber = (await import("bignumber.js")).default;
+    await requirePayment({ price: BigNumber(price) });
+  } catch (e: any) {
+    if (e?.code === -30402) throw e;
+  }
+}
+
 interface Tracker {
   name: string;
   category: string;
@@ -64,8 +79,9 @@ function extractHref(html: string, pattern: RegExp): string | undefined {
 }
 
 export function registerRoutes(app: Hono) {
-  app.get("/api/scan", async (c) => {
-    const url = c.req.query("url");
+  async function handleScan(c: any, params: { url?: string }) {
+    await tryRequirePayment(0.02);
+    const url = params.url;
     if (!url) return c.json({ error: "Missing required parameter: url" }, 400);
 
     let baseUrl: string;
@@ -163,5 +179,18 @@ export function registerRoutes(app: Hono) {
     };
 
     return c.json(result);
+  }
+
+  app.get("/api/scan", async (c) => {
+    return handleScan(c, { url: c.req.query("url") });
+  });
+
+  // POST mirror of the GET route above -- Bazaar (CDP) only reliably indexes
+  // POST payments with valid payloads (~82% conversion vs ~14% for GET-only
+  // resources, confirmed empirically). Same params, same logic, just body
+  // instead of query string.
+  app.post("/api/scan", async (c) => {
+    const body = await c.req.json().catch(() => ({}) as any);
+    return handleScan(c, { url: body.url });
   });
 }
