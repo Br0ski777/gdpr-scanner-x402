@@ -9,7 +9,7 @@ export const API_CONFIG: ApiConfig = {
     {
       method: "GET",
       path: "/api/scan",
-      price: "$0.02",
+      price: "$0.03",
       description: "Scan a website for GDPR compliance — cookie consent, privacy policy, trackers",
       toolName: "compliance_scan_gdpr",
       toolDescription:
@@ -80,7 +80,7 @@ Do NOT use for PII in text -- use compliance_detect_pii instead. Do NOT use for 
     {
       method: "POST",
       path: "/api/scan",
-      price: "$0.02",
+      price: "$0.03",
       description: "Scan a website for GDPR compliance — cookie consent, privacy policy, trackers (POST variant)",
       toolName: "compliance_scan_gdpr",
       toolDescription:
