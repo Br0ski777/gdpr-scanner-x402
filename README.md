@@ -4,7 +4,7 @@
 [![x402](https://img.shields.io/badge/payments-x402-6E56CF)](https://x402.org)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-Scan website GDPR compliance: cookie consent, privacy policy, trackers. Score 0-100. Pay-per-call via [x402](https://x402.org) (USDC on Base L2) -- no API key, no signup, no rate-limit wall.
+Scan any website for GDPR compliance -- cookie consent, privacy policy, trackers, DPO contact. Score 0-100. Pay-per-call via [x402](https://x402.org) (USDC on Base L2) -- no API key, no signup, no rate-limit wall.
 
 Part of the [klymax402](https://klymax402.com) marketplace -- 100 x402 micropayment APIs for AI agents, one wallet, USDC on Base.
 
@@ -35,11 +35,12 @@ Any x402-aware client ([`@x402/fetch`](https://www.npmjs.com/package/@x402/fetch
 
 | Tool | Method | Path | Price | Description |
 |---|---|---|---|---|
-| `compliance_scan_gdpr` | GET | `/api/scan` | $0.02 | Scan a website for GDPR compliance — cookie consent, privacy policy, trackers |
+| `compliance_scan_gdpr` | GET | `/api/scan` | $0.03 | Scan a website for GDPR compliance — cookie consent, privacy policy, trackers |
+| `compliance_scan_gdpr` | POST | `/api/scan` | $0.03 | Scan a website for GDPR compliance — cookie consent, privacy policy, trackers (POST variant) |
 
 ### `compliance_scan_gdpr`
 
-Use this when you need to check a website's GDPR compliance. Scans the URL plus /privacy-policy and /cookie-policy pages. Checks for cookie consent banner, privacy policy link, terms link, DPO contact info, data retention mentions, and third-party trackers (Google Analytics, Facebook Pixel, etc.). Returns a compliance score 0-100 with detailed findings and recommendations. Do NOT use for PII in text — use compliance_detect_pii. Do NOT use for tech detection — use website_detect_tech_stack.
+Use this when you need to check a website's GDPR compliance. Scans the URL plus /privacy-policy and /cookie-policy pages. Returns a compliance report in JSON.
 
 **Parameters**
 
@@ -47,8 +48,39 @@ Use this when you need to check a website's GDPR compliance. Scans the URL plus 
 |---|---|---|---|
 | `url` | string | yes | Website URL to scan for GDPR compliance (e.g. https://example.com) |
 
+Example response:
+
+```json
+{"url":"https://example.com","complianceScore":72,"cookieConsent":{"detected":true,"type":"banner"},"privacyPolicy":{"found":true,"url":"/privacy"},"thirdPartyTrackers":["Google Analytics","Facebook Pixel"],"recommendations":["Add DPO contact info","Add data retention policy"]}
+```
+
+**When to use**: launching a website in the EU, FOR compliance audits, due diligence on acquisitions, and regular privacy monitoring.
+
+**Not for**: PII in text (use `compliance_detect_pii`), tech detection (use `website_detect_tech_stack`), HTTP security headers (use `network_analyze_headers`).
+
+### `compliance_scan_gdpr`
+
+Use this when you need to check a website's GDPR compliance. Scans the URL plus /privacy-policy and /cookie-policy pages. Returns a compliance report in JSON. POST variant of compliance_scan_gdpr -- same params passed as JSON body instead of query string.
+
+**Parameters**
+
+| Name | Type | Required | Description |
+|---|---|---|---|
+| `url` | string | yes | Website URL to scan for GDPR compliance (e.g. https://example.com) |
+
+Example response:
+
+```json
+{"url":"https://example.com","complianceScore":72,"cookieConsent":{"detected":true,"type":"banner"},"privacyPolicy":{"found":true,"url":"/privacy"},"thirdPartyTrackers":["Google Analytics","Facebook Pixel"],"recommendations":["Add DPO contact info","Add data retention policy"]}
+```
+
+**When to use**: launching a website in the EU, FOR compliance audits, due diligence on acquisitions, and regular privacy monitoring.
+
+**Not for**: PII in text (use `compliance_detect_pii`), tech detection (use `website_detect_tech_stack`), HTTP security headers (use `network_analyze_headers`).
+
 ## Example agent prompts
 
+- "Check a website's GDPR compliance"
 - "Check a website's GDPR compliance"
 
 ## Payment
